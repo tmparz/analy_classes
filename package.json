@@ -1,0 +1,11 @@
+{
+  "name": "arz-workflow-checkup",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ARZ AI workflow checkup: six-question diagnostic and A4 PDF reports",
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": { "node": ">=20" }
+}
