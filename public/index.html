@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="回答六個問題，找出最值得改善的工作流程。免費體驗 AI 診斷與繁體中文三頁 PDF 報告。">
+  <meta name="theme-color" content="#234e42">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <title>AI 工作流程健檢｜ARZ</title>
+  <script defer src="/config.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"></script>
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner"><a class="brand" href="/" aria-label="ARZ 首頁"><span class="brand-mark">A.</span><span>ARZ <small>WORKFLOW LAB</small></span></a>
+      <a class="header-link" href="#quiz">開始健檢 <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+  <main>
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="sparkle">✳</span> FREE WORKFLOW CHECKUP ／ 免費工具</span>
+        <h1>每天重複的工作，<br><em>值得有更好的方法。</em></h1>
+        <p class="hero-lead">回訊息、排預約、整理表單……這些繁瑣工作正在吃掉多少時間？回答 6 個問題，讓 AI 幫你梳理現況，找到可以開始改善的第一步。</p>
+        <div class="hero-stats"><span><b>06</b> 個簡單問題</span><span class="stat-divider"></span><span><b>03</b> 分鐘左右</span><span class="stat-divider"></span><span><b>03</b> 頁個人化報告</span></div>
+        <a class="btn btn-primary hero-cta" href="#quiz">開始免費健檢 <span aria-hidden="true">→</span></a>
+        <p class="micro">無須登入，不要求留下電話。診斷建議僅供規劃參考。</p>
+      </div>
+      <aside class="hero-art" aria-hidden="true"><div class="art-circle"></div><div class="art-label">WORK SMARTER</div><div class="art-card card-1"><span>01 · 現況整理</span><strong>找到時間流失的地方</strong><div class="line long"></div><div class="line short"></div></div><div class="art-card card-2"><span>02 · 改善優先級</span><div class="art-squares"><i></i><i></i><i></i></div><strong>先做最有價值的事</strong></div><div class="art-card card-3"><span>03 · 專屬報告</span><strong>清楚的下一步 ↗</strong></div></aside>
+    </section>
+    <section class="intro-band"><div class="wrap band-inner"><span>從每天的忙碌，看見改善的可能。</span><span>梳理流程　／　AI 建議　／　PDF 報告</span></div></section>
+    <section class="quiz-area wrap" id="quiz">
+      <div class="section-heading"><div><span class="eyebrow">STEP 01 — WORKFLOW CHECKUP</span><h2>先聊聊你每天的工作</h2><p>依照真實情況填答就好，不需要懂程式，也不需要先決定要用什麼 AI 工具。</p></div><div class="step-badge">約 3 分鐘完成 <span aria-hidden="true">↘</span></div></div>
+      <div class="quiz-layout">
+        <form id="quiz-form" class="question-panel" novalidate>
+          <fieldset class="question"><legend><span class="number">01</span><span>你的工作或業務屬於哪一類？ <small>單選</small></span></legend>
+            <div class="choice-grid" id="industry-options">
+              <label class="choice"><input type="radio" name="industry" value="美容／美體" required><span>美容／美體</span></label>
+              <label class="choice"><input type="radio" name="industry" value="課程／教育"><span>課程／教育</span></label>
+              <label class="choice"><input type="radio" name="industry" value="診所／健康服務"><span>診所／健康服務</span></label>
+              <label class="choice"><input type="radio" name="industry" value="零售／電商"><span>零售／電商</span></label>
+              <label class="choice"><input type="radio" name="industry" value="餐飲"><span>餐飲</span></label>
+              <label class="choice"><input type="radio" name="industry" value="場館／活動"><span>場館／活動</span></label>
+              <label class="choice"><input type="radio" name="industry" value="顧問／接案"><span>顧問／接案</span></label>
+              <label class="choice"><input type="radio" name="industry" value="其他"><span>其他</span></label>
+            </div><label class="other-input" id="industry-other-wrap" hidden>你的行業<input type="text" id="industry-other" maxlength="60" placeholder="例如：寵物美容、行政代辦"></label>
+          </fieldset>
+          <fieldset class="question"><legend><span class="number">02</span><span>哪件事最占用你的時間？ <small>單選</small></span></legend>
+            <div class="choice-grid">
+              <label class="choice"><input type="radio" name="pain" value="回覆客戶訊息" required><span>回覆客戶訊息</span></label>
+              <label class="choice"><input type="radio" name="pain" value="預約排程"><span>預約排程</span></label>
+              <label class="choice"><input type="radio" name="pain" value="接單與訂單追蹤"><span>接單與訂單追蹤</span></label>
+              <label class="choice"><input type="radio" name="pain" value="資料整理與報表"><span>資料整理與報表</span></label>
+              <label class="choice"><input type="radio" name="pain" value="報名與行政審核"><span>報名與行政審核</span></label>
+              <label class="choice"><input type="radio" name="pain" value="內部交接與派工"><span>內部交接與派工</span></label>
+              <label class="choice"><input type="radio" name="pain" value="其他"><span>其他</span></label>
+            </div><label class="other-input" id="pain-other-wrap" hidden>最花時間的工作<input type="text" id="pain-other" maxlength="80" placeholder="例如：每週整理學員名單"></label>
+          </fieldset>
+          <fieldset class="question"><legend><span class="number">03</span><span>目前主要用什麼方式處理？ <small>可複選</small></span></legend>
+            <div class="choice-grid">
+              <label class="choice"><input type="checkbox" name="tools" value="LINE"><span>LINE</span></label>
+              <label class="choice"><input type="checkbox" name="tools" value="Excel"><span>Excel</span></label>
+              <label class="choice"><input type="checkbox" name="tools" value="Google 表單"><span>Google 表單</span></label>
+              <label class="choice"><input type="checkbox" name="tools" value="紙本／手寫"><span>紙本／手寫</span></label>
+              <label class="choice"><input type="checkbox" name="tools" value="現有系統"><span>現有系統</span></label>
+              <label class="choice"><input type="checkbox" name="tools" value="其他"><span>其他</span></label>
+            </div>
+          </fieldset>
+          <fieldset class="question"><legend><span class="number">04</span><span>這項工作大約花多少時間？</span></legend>
+            <div class="input-row"><label>一週處理幾次？ <input type="number" id="frequency" inputmode="numeric" min="1" max="200" step="1" placeholder="例如：35" required></label><label>每次大約幾分鐘？<input type="number" id="minutes" inputmode="numeric" min="1" max="240" step="1" placeholder="例如：10" required></label></div>
+            <p class="hint">用平均數估算就好，後續會標示計算假設，不會把總工時當成可以全部省下的時間。</p>
+          </fieldset>
+          <fieldset class="question"><legend><span class="number">05</span><span>你最希望改善什麼？ <small>單選</small></span></legend>
+            <div class="choice-grid">
+              <label class="choice"><input type="radio" name="goal" value="節省時間" required><span>節省時間</span></label>
+              <label class="choice"><input type="radio" name="goal" value="減少遺漏與錯誤"><span>減少遺漏與錯誤</span></label>
+              <label class="choice"><input type="radio" name="goal" value="提升顧客體驗"><span>提升顧客體驗</span></label>
+              <label class="choice"><input type="radio" name="goal" value="增加接單能力"><span>增加接單能力</span></label>
+            </div>
+          </fieldset>
+          <div class="question"><label class="question-label" for="notes"><span class="number">06</span><span>還有什麼想補充的？ <small>選填</small></span></label><textarea id="notes" maxlength="300" rows="3" placeholder="例如：目前兩個人輪流回覆 LINE，時段常常需要互相確認……"></textarea></div>
+          <div class="turnstile-box" id="turnstile-box" hidden><div id="turnstile-widget"></div><p class="micro">為防止自動化濫用，請完成安全驗證。</p></div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit" id="analyze-btn">產生我的 AI 健檢報告 <span aria-hidden="true">→</span></button><button class="btn btn-ghost" type="button" id="demo-btn">先看示範報告</button></div>
+          <p class="status" role="status" aria-live="polite" id="form-status"></p>
+          <p class="micro privacy-note">正式 AI 分析會將本次填答內容送至 Gemini API；網站不要求姓名、電話，也不建立問卷資料庫。<a href="#privacy">了解資料使用說明</a></p>
+        </form>
+        <aside class="sidebar"><div class="side-card"><span class="side-eyebrow">WHAT YOU GET</span><h3>完成後，你會得到</h3><div class="side-item"><b>01</b><div><strong>現況與時間盤點</strong><p>知道哪些事情最值得先整理。</p></div></div><div class="side-item"><b>02</b><div><strong>三個改善建議</strong><p>依照你的工作情境排列優先順序。</p></div></div><div class="side-item"><b>03</b><div><strong>可以帶走的 PDF</strong><p>含流程草圖、下一步行動與注意事項。</p></div></div></div><div class="side-quote"><span>“</span><p>先看清楚現在怎麼做，<br>才知道哪一步值得交給系統。</p><small>— ARZ 流程改善觀點</small></div></aside>
+      </div>
+    </section>
+    <section class="report-area" id="report-section" hidden>
+      <div class="wrap report-heading"><div><span class="eyebrow">YOUR PERSONAL REPORT</span><h2>你的流程健檢完成了</h2><p id="report-desc">這份報告依照你的填答整理，建議從一件事開始改善。</p></div><div class="report-actions"><button class="btn btn-primary" id="download-btn" type="button">下載三頁 PDF ↓</button><button class="btn btn-outline" id="print-btn" type="button">列印／另存 PDF</button><a class="btn btn-outline" href="#quiz">修改我的答案 ↖</a></div></div>
+      <div class="report-scroll"><div id="report-pages" class="report-pages"></div></div><p class="wrap report-note">提醒：這是初步規劃建議。工時估算不等於保證節省工時；導入前應驗證實際規則、資訊安全及預算。</p>
+    </section>
+    <section class="bottom-cta wrap"><div><span class="eyebrow">ARZ · WORKFLOW LAB</span><h2>把問題說清楚，<br>下一步就更容易。</h2><p>從 LINE 客服、預約、報名到資料整合，先找到最需要處理的瓶頸，再決定合適工具。</p><a id="portfolio-link" href="https://arz-ai-showcase.pages.dev/" target="_blank" rel="noopener noreferrer" class="btn btn-outline">看看阿茲的實作案例 ↗</a><a id="consult-link" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer" hidden>討論改善方式 ↗</a></div><div class="cta-decoration" aria-hidden="true">A<span>↗</span></div></section>
+  </main>
+  <footer class="footer" id="privacy"><div class="wrap footer-inner"><div><strong>ARZ · WORKFLOW LAB</strong><p>用清楚的流程，讓工作更順手。</p></div><div><p>資料說明：不要求個人聯絡資料；本網站不主動儲存填答內容。啟用 AI 時，資料會傳送至 Google Gemini API 進行本次分析。示範報告只在瀏覽器中產生。請勿填入客戶姓名、病歷、電話或其他敏感資訊。</p><small>© 2026 ARZ. 本工具提供初步評估，非專業稽核或成效保證。</small></div></div></footer>
+</body>
+</html>
