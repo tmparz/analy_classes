@@ -39,3 +39,19 @@ test("AI normalization keeps only three opportunities and removes HTML brackets"
   assert.equal(report.opportunities.length, 3);
   assert.equal(report.opportunities[0].title.includes("<"), false);
 });
+test("rejects coerced numbers such as booleans or arrays", () => {
+  assert.throws(() => validateAnswers({ ...example, frequency: true }));
+  assert.throws(() => validateAnswers({ ...example, minutes: [10] }));
+  assert.equal(validateAnswers({ ...example, frequency: "35" }).frequency, 35);
+});
+test("AI normalization trims extra items and ignores non-string entries", () => {
+  const raw = { title: "T", summary: "S", risks: ["R1", "R2", "R3"], opportunities: [{ title: "O1", why: "W", how: "H", effort: "高" }], nextSteps: [{ x: 1 }, "N2", "N3", "N4"], flow: ["F1", "F2", "F3", "F4", "F5"] };
+  const report = normalizeAiReport(raw, validateAnswers(example));
+  assert.deepEqual(report.risks, ["R1", "R2"]);
+  assert.equal(report.opportunities.length, 3);
+  assert.equal(report.opportunities[0].effort, "高");
+  assert.equal(report.nextSteps.length, 3);
+  assert.notEqual(report.nextSteps[0], "[object Object]");
+  assert.equal(report.nextSteps[1], "N2");
+  assert.equal(report.flow.length, 4);
+});

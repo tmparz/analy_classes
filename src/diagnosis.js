@@ -1,5 +1,8 @@
 // Pure functions shared by the Cloudflare API and Node tests. No personal data is persisted.
-const clean = (value, max = 160) => String(value ?? "").trim().replace(/[<>\u0000-\u001f]/g, "").slice(0, max);
+// Strip angle brackets and control characters, then cut by code point so emoji are never split in half.
+const clean = (value, max = 160) => Array.from(String(value ?? "").replace(/[<>\u0000-\u001f\u007f\u2028\u2029]/g, "").trim()).slice(0, max).join("");
+// Accept real numbers or numeric strings only (rejects true, [5], "" and similar coercion tricks).
+const toInt = value => (typeof value === "number" || (typeof value === "string" && /^\s*\d+\s*$/.test(value))) ? Number(value) : NaN;
 const INDUSTRIES = ["美容／美體", "課程／教育", "診所／健康服務", "零售／電商", "餐飲", "場館／活動", "顧問／接案", "其他"];
 const PAINS = ["回覆客戶訊息", "預約排程", "接單與訂單追蹤", "資料整理與報表", "報名與行政審核", "內部交接與派工", "其他"];
 const GOALS = ["節省時間", "減少遺漏與錯誤", "提升顧客體驗", "增加接單能力"];
@@ -11,9 +14,9 @@ export function validateAnswers(raw) {
   const pain = clean(raw.pain, 80);
   const goal = clean(raw.goal, 60);
   const notes = clean(raw.notes, 300);
-  const tools = Array.isArray(raw.tools) ? [...new Set(raw.tools.map(v => clean(v, 40)))].slice(0, 6) : [];
-  const frequency = Number(raw.frequency);
-  const minutes = Number(raw.minutes);
+  const tools = Array.isArray(raw.tools) ? [...new Set(raw.tools.slice(0, 12).map(v => clean(v, 40)))].slice(0, 6) : [];
+  const frequency = toInt(raw.frequency);
+  const minutes = toInt(raw.minutes);
   if (!industry || !(INDUSTRIES.includes(industry) || industry.length >= 2)) throw new Error("請選擇行業。");
   if (!pain || pain.length < 2) throw new Error("請填寫最花時間的工作。");
   if (!GOALS.includes(goal)) throw new Error("請選擇改善目標。");
@@ -65,20 +68,24 @@ export function buildDemoReport(answers) {
   };
 }
 
-const bounded = (v, max = 160) => clean(v, max);
+// Only plain strings are accepted from the model; objects/numbers would otherwise render as "[object Object]".
+const bounded = (v, max = 160) => typeof v === "string" ? clean(v, max) : "";
 export function normalizeAiReport(value, answers) {
   const fallback = buildDemoReport(answers);
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("AI 報告格式不正確。");
-  const list = (items, n, fallbackItems, max = 150) =>
-    Array.isArray(items) && items.length === n ? items.map((x, i) => bounded(x, max) || fallbackItems[i]) : fallbackItems;
-  const opportunities = Array.isArray(value.opportunities) && value.opportunities.length === 3
-    ? value.opportunities.map((item, i) => ({
-        title: bounded(item?.title, 34) || fallback.opportunities[i].title,
-        why: bounded(item?.why, 130) || fallback.opportunities[i].why,
-        how: bounded(item?.how, 150) || fallback.opportunities[i].how,
-        effort: ["低", "中", "高"].includes(item?.effort) ? item.effort : "中"
-      }))
-    : fallback.opportunities;
+  // Keep the first n items when the model returns extra ones; fall back per item only when an entry is missing/invalid.
+  const list = (items, n, fallbackItems, max = 150) => Array.from({ length: n }, (_, i) =>
+    (Array.isArray(items) ? bounded(items[i], max) : "") || fallbackItems[i]);
+  const ops = Array.isArray(value.opportunities) ? value.opportunities : [];
+  const opportunities = fallback.opportunities.map((fb, i) => {
+    const item = ops[i] && typeof ops[i] === "object" ? ops[i] : {};
+    return {
+      title: bounded(item.title, 34) || fb.title,
+      why: bounded(item.why, 130) || fb.why,
+      how: bounded(item.how, 150) || fb.how,
+      effort: ["低", "中", "高"].includes(item.effort) ? item.effort : (ops[i] ? "中" : fb.effort)
+    };
+  });
   return {
     title: bounded(value.title, 65) || fallback.title,
     summary: bounded(value.summary, 340) || fallback.summary,
@@ -90,17 +97,20 @@ export function normalizeAiReport(value, answers) {
   };
 }
 
+const strings = n => ({ type: "ARRAY", items: { type: "STRING" }, minItems: n, maxItems: n });
 export const reportSchema = {
   type: "OBJECT",
   properties: {
     title: { type: "STRING" },
     summary: { type: "STRING" },
-    risks: { type: "ARRAY", items: { type: "STRING" } },
-    opportunities: { type: "ARRAY", items: { type: "OBJECT", properties: {
-      title: { type: "STRING" }, why: { type: "STRING" }, how: { type: "STRING" }, effort: { type: "STRING" }
+    risks: strings(2),
+    opportunities: { type: "ARRAY", minItems: 3, maxItems: 3, items: { type: "OBJECT", properties: {
+      title: { type: "STRING" }, why: { type: "STRING" }, how: { type: "STRING" },
+      effort: { type: "STRING", format: "enum", enum: ["低", "中", "高"] }
     }, required: ["title", "why", "how", "effort"] } },
-    nextSteps: { type: "ARRAY", items: { type: "STRING" } },
-    flow: { type: "ARRAY", items: { type: "STRING" } }
+    nextSteps: strings(3),
+    flow: strings(4)
   },
-  required: ["title", "summary", "risks", "opportunities", "nextSteps", "flow"]
+  required: ["title", "summary", "risks", "opportunities", "nextSteps", "flow"],
+  propertyOrdering: ["title", "summary", "risks", "opportunities", "nextSteps", "flow"]
 };

@@ -2,6 +2,8 @@ name: Check MVP
 on:
   push:
   pull_request:
+permissions:
+  contents: read
 jobs:
   node-test:
     runs-on: ubuntu-latest

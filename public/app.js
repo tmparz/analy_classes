@@ -69,7 +69,7 @@ function showReport(data) {
   const { report, answers, metrics } = data;
   latestReport = data;
   const date = dateLabel(data.generatedAt);
-  const ribbon = report.isDemo ? '<div class="demo-ribbon">示範報告｜非 AI 分析結果</div>' : '<div class="demo-ribbon" style="background:#edf5eb;color:#346247;border-color:#cfdfcc">AI 個人化初步建議</div>';
+  const ribbon = report.isDemo ? '<div class="demo-ribbon">示範報告｜非 AI 分析結果</div>' : '<div class="demo-ribbon ai-ribbon">AI 個人化初步建議</div>';
   const risks = (report.risks || []).slice(0, 2).map((r, i) => '<div class="risk-item"><b>0' + (i + 1) + '</b><span>' + txt(r) + '</span></div>').join("");
   const cards = (report.opportunities || []).slice(0, 3).map((o, i) =>
     '<article class="op-card"><div class="op-card-top"><span class="op-number">0' + (i + 1) + '</span><span class="op-title">' + txt(o.title) + '</span><span class="effort">導入難度 ' + txt(o.effort, 6) + '</span></div><p><strong>為什麼：</strong>' + txt(o.why) + '</p><p><strong>先怎麼做：</strong>' + txt(o.how) + '</p></article>'
@@ -131,10 +131,12 @@ form.addEventListener("submit", async event => {
   let answers;
   try { answers = readAnswers(); }
   catch (error) { setStatus(error.message, "error"); return; }
+  const token = turnstileToken();
+  if (config.turnstileSiteKey && !token) { setStatus("請先完成下方的安全驗證，再送出分析。", "error"); return; }
   analyzeButton.disabled = true;
   setStatus("正在分析工作流程，通常需要幾秒鐘……");
   try {
-    const response = await fetch("/api/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ answers, turnstileToken: turnstileToken() }), signal: AbortSignal.timeout(35000), cache: "no-store" });
+    const response = await fetch("/api/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ answers, turnstileToken: token }), signal: AbortSignal.timeout(35000), cache: "no-store" });
     let result;
     try { result = await response.json(); } catch { throw new Error("伺服器未回傳有效資料，請稍後再試。"); }
     if (!response.ok) throw new Error(result.error || "分析未完成，請稍後再試。");

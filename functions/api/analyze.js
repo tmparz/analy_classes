@@ -1,12 +1,13 @@
 import { validateAnswers, calculateMetrics, normalizeAiReport, reportSchema } from "../../src/diagnosis.js";
 
-const json = (data, status = 200) => new Response(JSON.stringify(data), {
+const MAX_BODY_BYTES = 8000;
+const json = (data, status = 200, extra = {}) => new Response(JSON.stringify(data), {
   status,
-  headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" }
+  headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff", ...extra }
 });
 
 async function verifyTurnstile(token, request, secret) {
-  if (!secret) return true; // Set TURNSTILE_SECRET_KEY + TURNSTILE_SITE_KEY before public launch.
+  if (!secret) return true; // Set TURNSTILE_SECRET_KEY (and turnstileSiteKey in public/config.js) before public launch.
   if (typeof token !== "string" || !token) return false;
   const form = new FormData();
   form.append("secret", secret);
@@ -23,15 +24,15 @@ export async function onRequestPost({ request, env }) {
   const origin = request.headers.get("origin");
   if (origin && origin !== new URL(request.url).origin) return json({ error: "不接受跨來源請求。" }, 403);
   if (!request.headers.get("content-type")?.toLowerCase().includes("application/json")) return json({ error: "請以 JSON 送出。" }, 415);
+  // Reject oversized bodies before reading them, then re-check the real byte size (Content-Length can be absent).
+  if (Number(request.headers.get("content-length") || 0) > MAX_BODY_BYTES) return json({ error: "資料超過大小限制。" }, 413);
   const body = await request.text();
-  if (body.length > 6000) return json({ error: "資料超過大小限制。" }, 413);
-  let payload, answers;
-  try {
-    payload = JSON.parse(body);
-    answers = validateAnswers(payload.answers);
-  } catch (e) {
-    return json({ error: e instanceof SyntaxError ? "送出資料格式錯誤。" : e.message }, 400);
-  }
+  if (new TextEncoder().encode(body).length > MAX_BODY_BYTES) return json({ error: "資料超過大小限制。" }, 413);
+  let payload;
+  try { payload = JSON.parse(body); } catch { return json({ error: "送出資料格式錯誤。" }, 400); }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) return json({ error: "送出資料格式錯誤。" }, 400);
+  let answers;
+  try { answers = validateAnswers(payload.answers); } catch (e) { return json({ error: e.message }, 400); }
   try {
     if (!(await verifyTurnstile(payload.turnstileToken, request, env.TURNSTILE_SECRET_KEY))) return json({ error: "安全驗證失敗，請重新勾選再試。" }, 403);
   } catch {
@@ -67,5 +68,5 @@ JSON 限制：risks 恰好 2 項；opportunities 恰好 3 項，每項 title、w
 }
 
 export function onRequestGet() {
-  return json({ error: "此端點只接受 POST。" }, 405);
+  return json({ error: "此端點只接受 POST。" }, 405, { allow: "POST" });
 }
